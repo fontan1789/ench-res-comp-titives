@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0b0c10;--surf:#13141a;--card:#1a1c25;--card2:#1f2230;--border:#272a3a;--gold:#c8a24b;--gold2:#e8cc88;--red:#d94f4f;--diam:#d97c4f;--grn:#52b788;--blu:#5b8dee;--txt:#dcd9d0;--muted:#6b6e80;--ok-bg:#0b1f14;--ok-bdr:#52b788;--ok-txt:#8ee8b5;--no-bg:#1a0b0b;--no-bdr:#d94f4f;--no-txt:#f0a0a0}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--txt);font-family:'DM Mono',monospace;font-weight:300;min-height:100vh}
+.app{max-width:740px;margin:0 auto;padding:1.5rem 1rem 3rem}
+
+/* ── HOME ── */
+.home{text-align:center;padding:2rem 0}
+.home-emblem{font-size:2.2rem;letter-spacing:.15em;margin-bottom:1.2rem;opacity:.9}
+.home-emblem .r{color:var(--red)}.home-emblem .o{color:var(--diam)}
+.home-title{font-family:'Cormorant Garamond',serif;font-size:clamp(2rem,6vw,3rem);font-weight:700;line-height:1.1;margin-bottom:.5rem}
+.home-title span{color:var(--gold)}
+.home-sub{font-size:12px;color:var(--muted);letter-spacing:.08em;margin-bottom:2.5rem}
+.level-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;max-width:520px;margin:0 auto}
+.lvl-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:1.5rem 1.2rem;cursor:pointer;text-align:left;transition:border-color .2s,transform .15s;position:relative;overflow:hidden}
+.lvl-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:0;transition:opacity .2s}
+.lvl-card:hover{border-color:var(--gold);transform:translateY(-2px)}.lvl-card:hover::before{opacity:1}
+.lvl-tag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:.6rem}
+.lvl-name{font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;margin-bottom:.4rem}
+.lvl-desc{font-size:11px;color:var(--muted);line-height:1.6}
+.lvl-badge{display:inline-block;margin-top:.75rem;font-size:10px;color:var(--muted);border:1px solid var(--border);border-radius:20px;padding:3px 10px}
+
+/* ── QUIZ ── */
+.quiz-wrap{display:none}
+.topbar{display:flex;align-items:center;gap:10px;margin-bottom:1.2rem}
+.back-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:.35rem .7rem;cursor:pointer;color:var(--muted);font-family:'DM Mono',monospace;font-size:12px;transition:border-color .15s,color .15s}
+.back-btn:hover{border-color:var(--gold);color:var(--gold)}
+.level-pill{font-size:10px;letter-spacing:.1em;padding:3px 10px;border-radius:20px;border:1px solid var(--border);color:var(--gold)}
+.spacer{flex:1}
+.q-counter{font-size:11px;color:var(--muted)}
+
+.pbar-wrap{margin-bottom:1.2rem}
+.pbar-top{display:flex;justify-content:space-between;margin-bottom:.4rem}
+.pbar-label{font-size:11px;color:var(--muted)}
+.pbar-score{font-size:11px;color:var(--gold)}
+.pbar-track{height:2px;background:var(--border);border-radius:1px}
+.pbar-fill{height:100%;background:var(--gold);border-radius:1px;transition:width .4s}
+
+.q-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;animation:fadeUp .3s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.q-header{background:var(--surf);border-bottom:1px solid var(--border);padding:.7rem 1.2rem;display:flex;align-items:center;justify-content:space-between}
+.q-cat{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold)}
+.q-body{padding:1.2rem}
+.q-text{font-family:'Cormorant Garamond',serif;font-size:1.1rem;font-weight:500;line-height:1.6;color:var(--txt);margin-bottom:1.1rem}
+
+/* hand */
+.hand-wrap{background:#0a0c12;border:1px solid var(--border);border-radius:12px;padding:.9rem 1rem;margin-bottom:1.1rem;display:flex;gap:1.5rem;flex-wrap:wrap}
+.hand-col{}
+.hand-label{font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:.5rem}
+.hand-suits{display:flex;flex-direction:column;gap:3px}
+.hr{display:flex;align-items:center;gap:7px;font-size:13px}
+.ss{width:18px;text-align:center;font-size:15px}
+.ss.sp{color:var(--txt)}.ss.ht{color:var(--red)}.ss.di{color:var(--diam)}.ss.cl{color:#7ecf6e}
+.sc{font-size:13px;letter-spacing:.02em}
+.hand-meta{font-size:11px;color:var(--muted);margin-top:.6rem;padding-top:.6rem;border-top:1px solid var(--border)}
+.hand-meta span{color:var(--gold);font-weight:400}
+
+/* context box */
+.ctx-box{background:#0f1118;border:1px solid var(--border);border-radius:10px;padding:.7rem .9rem;margin-bottom:1.1rem;font-size:12px;color:var(--muted);line-height:1.6}
+.ctx-box strong{color:var(--gold2)}
+
+.opts{display:flex;flex-direction:column;gap:7px}
+.opt{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:.75rem .95rem;cursor:pointer;font-family:'DM Mono',monospace;font-size:13px;color:var(--txt);text-align:left;display:flex;align-items:flex-start;gap:10px;transition:border-color .15s,background .15s;line-height:1.5;min-height:44px}
+.opt:hover:not([disabled]){border-color:var(--gold);background:var(--card2)}
+.opt[disabled]{cursor:default}
+.opt-k{min-width:22px;height:22px;border-radius:6px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted);flex-shrink:0;margin-top:1px;transition:.15s}
+.opt:hover:not([disabled]) .opt-k{border-color:var(--gold);color:var(--gold)}
+.opt.correct{background:var(--ok-bg);border-color:var(--ok-bdr);color:var(--ok-txt)}
+.opt.correct .opt-k{background:var(--ok-bdr);border-color:var(--ok-bdr);color:#fff}
+.opt.wrong{background:var(--no-bg);border-color:var(--no-bdr);color:var(--no-txt)}
+.opt.wrong .opt-k{background:var(--no-bdr);border-color:var(--no-bdr);color:#fff}
+
+.expl{margin-top:1rem;padding:.85rem .95rem;border-left:2px solid var(--gold);background:#0e0f16;font-size:12px;line-height:1.7;color:#a8adc0;display:none;border-radius:0 8px 8px 0}
+.expl.show{display:block;animation:fadeUp .2s ease}
+.expl strong{color:var(--gold2);font-weight:400}
+
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-top:1rem}
+.nav-btn{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:.5rem .95rem;cursor:pointer;font-family:'DM Mono',monospace;font-size:12px;color:var(--txt);transition:border-color .15s}
+.nav-btn:hover:not([disabled]){border-color:var(--gold)}
+.nav-btn[disabled]{opacity:.3;cursor:default}
+.nav-mid{font-size:11px;color:var(--muted)}
+.nav-mid span{color:var(--gold)}
+
+/* result */
+.result-wrap{display:none;text-align:center;padding:2rem 1rem}
+.res-emblem{font-size:2rem;letter-spacing:.2em;margin-bottom:1rem;opacity:.8}
+.res-emblem .r{color:var(--red)}.res-emblem .o{color:var(--diam)}
+.res-num{font-family:'Cormorant Garamond',serif;font-size:5rem;font-weight:700;color:var(--gold);line-height:1}
+.res-denom{font-size:13px;color:var(--muted);margin-bottom:.5rem}
+.res-level{font-size:11px;letter-spacing:.1em;color:var(--gold);margin-bottom:1.2rem}
+.res-msg{font-size:14px;color:var(--txt);line-height:1.7;max-width:400px;margin:0 auto 2rem}
+.res-btns{display:flex;flex-direction:column;gap:10px;max-width:360px;margin:0 auto}
+.res-btn{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:.75rem 1rem;cursor:pointer;font-family:'DM Mono',monospace;font-size:13px;color:var(--txt);transition:border-color .2s}
+.res-btn:hover{border-color:var(--gold)}
+.res-btn.gold{border-color:var(--gold);color:var(--gold)}
+
+.r{color:var(--red)}.o{color:var(--diam)}.g{color:#7ecf6e}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- HOME -->
+<div class="home" id="home">
+  <div class="home-emblem"><span class="r">♥</span><span class="o">♦</span>♣♠</div>
+  <h1 class="home-title">Enchères<br><span>Compétitives</span></h1>
+  <p class="home-sub">SEF 2024 · Joueur Moyen · Quiz avec mains</p>
+  <div class="level-grid">
+    <div class="lvl-card" onclick="start(1)">
+      <div class="lvl-tag">Niveau 1</div>
+      <div class="lvl-name">Fondements</div>
+      <div class="lvl-desc">Contre d'appel, Michaels, UNT, interventions simples, contre négatif, réveil</div>
+      <div class="lvl-badge">10 questions</div>
+    </div>
+    <div class="lvl-card" onclick="start(2)">
+      <div class="lvl-tag">Niveau 2</div>
+      <div class="lvl-name">Maîtrise</div>
+      <div class="lvl-desc">Situations complexes, cue-bids, sacrifices, soutien, pénalités, séquences avancées</div>
+      <div class="lvl-badge">10 questions</div>
+    </div>
+  </div>
+</div>
+
+<!-- QUIZ -->
+<div class="quiz-wrap" id="quiz">
+  <div class="topbar">
+    <button class="back-btn" onclick="goHome()">← menu</button>
+    <span class="level-pill" id="lvl-pill"></span>
+    <span class="spacer"></span>
+    <span class="q-counter" id="q-counter"></span>
+  </div>
+  <div class="pbar-wrap">
+    <div class="pbar-top"><span class="pbar-label" id="pbar-label"></span><span class="pbar-score" id="pbar-score"></span></div>
+    <div class="pbar-track"><div class="pbar-fill" id="pbar-fill" style="width:10%"></div></div>
+  </div>
+  <div class="q-card" id="q-card">
+    <div class="q-header"><span class="q-cat" id="q-cat"></span></div>
+    <div class="q-body">
+      <div class="q-text" id="q-text"></div>
+      <div id="hand-zone"></div>
+      <div id="ctx-zone"></div>
+      <div class="opts" id="opts"></div>
+      <div class="expl" id="expl"></div>
+    </div>
+  </div>
+  <div class="nav-row">
+    <button class="nav-btn" id="prev-btn" onclick="nav(-1)" disabled>← préc</button>
+    <span class="nav-mid" id="nav-mid"></span>
+    <button class="nav-btn" id="next-btn" onclick="nav(1)" disabled>suiv →</button>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="result-wrap" id="result">
+  <div class="res-emblem"><span class="r">♥</span><span class="o">♦</span>♣♠</div>
+  <div class="res-num" id="res-num"></div>
+  <div class="res-denom" id="res-denom"></div>
+  <div class="res-level" id="res-level"></div>
+  <div class="res-msg" id="res-msg"></div>
+  <div class="res-btns">
+    <button class="res-btn gold" onclick="restart()">↺ recommencer ce niveau</button>
+    <button class="res-btn" onclick="goOther()">⇄ autre niveau</button>
+    <button class="res-btn" onclick="goHome()">⊞ menu principal</button>
+  </div>
+</div>
+
+</div>
+
+<script>
+const LEVELS = {
+1: {
+  label:'Niveau 1 — Fondements',
+  q:[
+    {
+      cat:'Contre d\'appel',
+      q:'L\'adversaire de gauche ouvre 1♥. Quelle est votre action ?',
+      hand:{s:'KJ84',h:'73',d:'AQ95',c:'K62'},
+      ctx:null,
+      pts:'13 H · 4♠ 2♥ 4♦ 3♣',
+      opts:['Passe — attendre','1♠ — intervention simple','Contre d\'appel — montre les non-licitées','1SA — 15-18 H + arrêt'],
+      ans:2,
+      expl:'<strong>Contre d\'appel</strong> sur 1♥ : 4 piques + couleur mineure (idéalement 4-4), minimum 11 H. Avec 13 H, 4♠ et 4♦, c\'est la description parfaite. Le partenaire choisit la meilleure couleur parmi les non-licitées.'
+    },
+    {
+      cat:'Michaels Cue-bid',
+      q:'L\'adversaire ouvre 1♦. Vous avez un bicolore majeur. Que faites-vous ?',
+      hand:{s:'KJ963',h:'AQ874',d:'4',c:'73'},
+      ctx:null,
+      pts:'12 H · 5♠ 5♥ — non vulnérable',
+      opts:['1♠ — intervention simple','2♦ Michaels — bicolore ♠+♥','2SA Unusual — bicolore mineur','Contre d\'appel'],
+      ans:1,
+      expl:'<strong>2♦ Michaels</strong> : sur 1♣ ou 1♦, le cue-bid Michaels montre 5+ cœurs + 5+ piques. 12 H non-vulnérable est une force acceptable (8-17 H). Le partenaire choisit la majeure. Plus précis qu\'une intervention simple.'
+    },
+    {
+      cat:'Unusual 2SA',
+      q:'Adversaire ouvre 1♠. Votre bicolore mineur — quelle action ?',
+      hand:{s:'4',h:'73',d:'KQJ86',c:'AQ975'},
+      ctx:null,
+      pts:'12 H · 5♦ 5♣ · non vulnérable',
+      opts:['2♣ — intervention simple en trèfles','2SA Unusual — bicolore ♦+♣','3♣ — barrage','Contre d\'appel'],
+      ans:1,
+      expl:'<strong>2SA Unusual (UNT)</strong> : sur 1♠, il montre les deux couleurs inférieures non licitées = ♦ et ♣, bicolore 5-5 minimum. Force variable selon vulnérabilité. Le partenaire choisit la mineure. Très précis pour les bicolores mineurs.'
+    },
+    {
+      cat:'Contre négatif',
+      q:'Partner ouvre 1♦, adversaire intervient 1♠. Votre main ?',
+      hand:{s:'73',h:'KJ85',d:'Q63',c:'AJ74'},
+      ctx:'Séquence : 1♦ – (1♠) – ?',
+      pts:'11 H · 4♥ 4♣',
+      opts:['1SA — arrêt pique','2♥ — naturel 5+ cartes','Contre négatif — 4♥ et 4♣','2♠ — cue-bid forcing'],
+      ans:2,
+      expl:'<strong>Contre négatif</strong> : après 1♦ – (1♠), il montre les deux couleurs non licitées = 4♥ + 4♣ minimum, 7+ H. Votre main est idéale. 2♥ supposerait 5+ cartes. Le contre est bien plus précis et laisse le partenaire choisir.'
+    },
+    {
+      cat:'Intervention simple',
+      q:'Adversaire ouvre 1♣. Vous avez une belle couleur. Que faites-vous ?',
+      hand:{s:'AKQ974',h:'K3',d:'Q72',c:'84'},
+      ctx:null,
+      pts:'14 H · 6 piques solides',
+      opts:['Contre d\'appel','1♠ — intervention simple (9-17 H)','2♠ — saut constructif','3♠ — barrage'],
+      ans:1,
+      expl:'<strong>1♠ intervention simple</strong> : 5+ cartes de qualité, 9-17 H. Avec 6 piques solides (AKQ) et 14 H, l\'intervention 1♠ est parfaite. Elle laisse de la place pour décrire la force ensuite. Le saut 2♠ existe aussi mais 1♠ est plus souple.'
+    },
+    {
+      cat:'Réveil',
+      q:'1♥ – (passe) – passe – ? Vous êtes en position de réveil (balancing).',
+      hand:{s:'AJ73',h:'84',d:'KQ65',c:'Q92'},
+      ctx:'Séquence : (1♥) – passe – (passe) – ?',
+      pts:'12 H · 4♠ 4♦ · distribution 4-2-4-3',
+      opts:['Passe — laissez jouer','1SA de réveil (11-14 H)','Contre de balancing (9-14 H)','2♦ — intervention tardive'],
+      ans:2,
+      expl:'<strong>Contre de balancing</strong> : en position de réveil après 1♥ – passe – passe, on rouvre avec un contre (9-14 H). 4♠ + 4♦ + 12 H : idéal. Le partenaire peut laisser pour pénalité s\'il a des cœurs, ou choisir une couleur. Ne pas passer laisse les adversaires marquer facilement.'
+    },
+    {
+      cat:'1SA en intervention',
+      q:'Adversaire ouvre 1♥. Vous avez une main SA avec arrêt solide. Action ?',
+      hand:{s:'AQ4',h:'KJ7',d:'K982',c:'Q85'},
+      ctx:null,
+      pts:'16 H · équilibrée · arrêt ♥ solide',
+      opts:['Passe — trop risqué','Contre d\'appel — sans les piques','1SA en intervention (15-18 H + arrêt)','2SA Unusual — bicolore mineur'],
+      ans:2,
+      expl:'<strong>1SA en intervention</strong> : 15-18 H équilibrée + arrêt garanti dans la couleur adverse. Kx de cœur est un arrêt. Le partenaire peut utiliser Stayman ou Texas depuis cette position. Le contre d\'appel serait inapproprié (vous n\'avez pas 4 piques).'
+    },
+    {
+      cat:'Michaels avancé',
+      q:'Adversaire ouvre 1♥. Votre bicolore pique + mineure. Que faites-vous ?',
+      hand:{s:'KQ974',h:'5',d:'AJ853',c:'74'},
+      ctx:null,
+      pts:'12 H · 5♠ 5♦ · non vulnérable',
+      opts:['1♠ — intervention simple','2♥ Michaels — ♠ + mineure','2SA Unusual — ♦ + ♣','Contre d\'appel'],
+      ans:1,
+      expl:'<strong>2♥ Michaels</strong> sur 1♥ : montre 5+ piques + 5+ dans une mineure (non précisée). Le partenaire répond d\'abord 2♠ ou demandera la mineure. Avec 12 H non-vul, la force est correcte. Si le partenaire demande la mineure, vous montrerez ♦.'
+    },
+    {
+      cat:'Contre de pénalité',
+      q:'Adversaires licites 4♠ – passe – passe. Vous avez des piques solides.',
+      hand:{s:'KJ1095',h:'AQ3',d:'K74',c:'Q8'},
+      ctx:'Séquence : (1♠) – passe – (4♠) – passe – (passe) – ?',
+      pts:'16 H · 5 piques solides · main défensive',
+      opts:['Passe — ils jouent 4♠','4SA — bizarre ici','Contre de pénalité','5♥ — aventureux'],
+      ans:2,
+      expl:'<strong>Contre de pénalité</strong> : en position de réveil sur 4♠, avec 16 H et 5 piques derrière l\'ouvreur (donc bien placés), doubler est rentable. La défense promet 2-3 levées de vos seuls honneurs. Le partenaire a passé partout — il a une main passive.'
+    },
+    {
+      cat:'UNT sur 1♥',
+      q:'Adversaire ouvre 1♥. Vous avez ce bicolore mineur 5-5. Action ?',
+      hand:{s:'3',h:'74',d:'KQJ86',c:'AQ975'},
+      ctx:null,
+      pts:'12 H · 5♦ 5♣ · non vulnérable',
+      opts:['2♣ — intervention simple','2SA Unusual — ♦ + ♣','3♣ — barrage','Contre d\'appel'],
+      ans:1,
+      expl:'<strong>2SA Unusual (UNT)</strong> sur 1♥ : montre les deux couleurs inférieures non licitées = ♦ et ♣. Bicolore 5-5 minimum, 12 H non-vul est acceptable. Le partenaire choisit la meilleure mineure. Idéal pour décrire les deux couleurs en une enchère.'
+    }
+  ]
+},
+2: {
+  label:'Niveau 2 — Maîtrise',
+  q:[
+    {
+      cat:'Sacrifice calculé',
+      q:'Adversaires annoncent 4♥ vulnérables. Vous êtes non-vulnérable.',
+      hand:{s:'KQJ985',h:'4',d:'Q762',c:'83'},
+      ctx:'Adversaires vul. → 4♥ = ~620 pts. Vous êtes non-vul.',
+      pts:'9 H · 6 piques · non vulnérable',
+      opts:['Passe — trop risqué de sacrifier','Contre de pénalité','4♠ — sacrifice calculé (−2 = −300)','5♠ — trop haut'],
+      ans:2,
+      expl:'<strong>4♠ sacrifice rentable</strong> : non-vul contre vul, si vous chutez de 2 doublé = −300, inférieur aux 620 marqués par 4♥ vul. 6 piques avec KQJ garantit 8 levées minimum. La règle de 500 : sacrifice acceptable si pertes &lt; gain adverse.'
+    },
+    {
+      cat:'Cue-bid après intervention',
+      q:'Partner ouvre 1♥, adversaire intervient 2♣. Quelle enchère ?',
+      hand:{s:'K73',h:'QJ84',d:'AQ5',c:'962'},
+      ctx:'Séquence : 1♥ – (2♣) – ?',
+      pts:'13 H · 4♥ · arrêt ♦ · pas d\'arrêt ♣',
+      opts:['2♥ — soutien direct 6-9 H','3♥ — soutien saut invitation','3♣ — cue-bid, soutien forcing','2SA — arrêt ♣ ?'],
+      ans:2,
+      expl:'<strong>3♣ cue-bid</strong> — enchère de la couleur adverse pour montrer un soutien forcing en cœurs avec une main plus forte que 2♥. Après intervention 2♣, le cue-bid 3♣ = soutien 3+ cœurs, forcing 1 ronde. Plus précis que sauter à 3♥ qui serait une invitation ambiguë.'
+    },
+    {
+      cat:'Contre de support',
+      q:'Vous avez ouvert 1♥, adversaire intervient 2♣, partenaire répond 1♠. Que faites-vous ?',
+      hand:{s:'K4',h:'AKJ75',d:'AQ3',c:'Q92'},
+      ctx:'Séquence : 1♥ – (2♣) – 1♠ – ? (vous êtes l\'ouvreur)',
+      pts:'18 H · 5♥ · 3♠ · main forte',
+      opts:['2♥ — retour à la couleur','3♠ — soutien saut','Contre de support (Support Double) — 3♠ + 15-17 H','2SA — force mais pas de fit'],
+      ans:2,
+      expl:'<strong>Contre de support (Support Double)</strong> : après intervention adverse, l\'ouvreur contre pour montrer exactement 3 cartes dans la majeure du répondant + une main forte (15-17 H). Ici 3 piques + 18 H = contre de support parfait. Le partenaire saura que vous avez 3 piques et décide du niveau.'
+    },
+    {
+      cat:'Réveil avec SA',
+      q:'(1♠) – passe – (passe) – ? Vous pouvez rouverture à 1SA.',
+      hand:{s:'Q97',h:'AJ4',d:'KQ83',c:'K75'},
+      ctx:'Séquence : (1♠) – passe – (passe) – ?',
+      pts:'15 H · équilibrée · arrêt ♠ (Q97)',
+      opts:['Passe — laissez jouer 1♠','Contre de balancing','1SA de réveil (11-14 H)','2SA — trop fort'],
+      ans:2,
+      expl:'<strong>1SA de réveil</strong> : en balancing, 1SA = 11-14 H équilibrée avec arrêt dans la couleur adverse. Votre Q97 de pique est un arrêt partiel suffisant en réveil. 15 H est légèrement au-dessus mais 1SA reste le meilleur descripteur. Le partenaire peut développer.'
+    },
+    {
+      cat:'Michaels force maximum',
+      q:'Adversaire ouvre 1♠. Vous avez une main Michaels très forte. Comment procéder ?',
+      hand:{s:'4',h:'AKQJ8',d:'3',c:'AKQ972'},
+      ctx:'Avec 18+ H, on préfère contre puis correction plutôt que Michaels direct.',
+      pts:'19 H · 5♥ 6♣ · très forte',
+      opts:['2♠ Michaels direct — ♥ + mineure','Contre puis correction (18+ H)','3♥ — barrage?','1SA — mais sans arrêt'],
+      ans:1,
+      expl:'<strong>Contre puis correction</strong> : avec 17+ H, Michaels direct sous-décrit la main (force max implicite ~13 H non-vul). On contre (montre force), puis si partenaire répond, on corrige dans notre couleur. Cela montre une main trop forte pour un Michaels simple.'
+    },
+    {
+      cat:'UNT réponse',
+      q:'Partner intervient 2SA Unusual (UNT) sur 1♠ adverse. Votre main ?',
+      hand:{s:'Q83',h:'J74',d:'K9652',c:'84'},
+      ctx:'Séquence : (1♠) – 2SA UNT – (passe) – ? (vous êtes répondant)',
+      pts:'7 H · 5♦ · main faible',
+      opts:['2SA — bizarre','3♣ — choisit les trèfles','3♦ — choisit les carreaux','Passe — pas légal'],
+      ans:2,
+      expl:'<strong>3♦</strong> : le 2SA UNT montre ♦ + ♣. Avec 5 carreaux et K♦, on choisit les carreaux. Même avec 7 H, le partenaire a promis 5-5 mineur — la couleur sera jouable. On ne passe jamais sur un UNT (enchère forcing de fait).'
+    },
+    {
+      cat:'Sacrifice ou manche',
+      q:'Adversaires licites 3♠ en compétition. Que faites-vous ?',
+      hand:{s:'74',h:'AQ9854',d:'K82',c:'Q3'},
+      ctx:'Séquence : 1♥ (vous) – (2♠) – 3♥ (partner) – (3♠) – ?',
+      pts:'13 H · 6♥ · non vulnérable',
+      opts:['Passe — laissez-les jouer 3♠','Contre de pénalité','4♥ — manche ou sacrifice','5♥ — trop haut'],
+      ans:2,
+      expl:'<strong>4♥</strong> : votre main est forte (13 H, 6 cœurs avec AQ) et le fit avec partenaire est confirmé. 4♥ peut être la manche si partenaire est fort (10+ H), ou un sacrifice rentable si les adversaires peuvent faire 3♠. Avec une longue solide et de la force, on pousse à la manche.'
+    },
+    {
+      cat:'Contre négatif avancé',
+      q:'Partner ouvre 1♣, adversaire intervient 2♦. Votre main ?',
+      hand:{s:'KJ74',h:'AJ85',d:'73',c:'Q92'},
+      ctx:'Séquence : 1♣ – (2♦) – ?',
+      pts:'12 H · 4♠ 4♥',
+      opts:['2♥ — naturel 4 cartes ?','2SA — arrêt ♦','Contre négatif — 4♠ et 4♥, 7+ H','3♣ — soutien'],
+      ans:2,
+      expl:'<strong>Contre négatif</strong> : après 1♣ – (2♦), le contre montre les deux majeures (4♠ et 4♥), 7+ H. 2♥ suggèrerait 5+ cartes. Avec 12 H, le contre est idéal — il force l\'ouvreur à décrire et laisse le choix de couleur. Puis on licite agressivement vers la manche.'
+    },
+    {
+      cat:'Intervention saut',
+      q:'Adversaire ouvre 1♥. Vous avez 6 piques solides et force limitée. Action ?',
+      hand:{s:'KQJ975',h:'3',d:'Q854',c:'72'},
+      ctx:null,
+      pts:'9 H · 6♠ solides · non vulnérable',
+      opts:['1♠ — intervention simple','2♠ — saut constructif-barrage (9-13 H, 6 cartes)','3♠ — barrage niveau 3','Contre d\'appel'],
+      ans:1,
+      expl:'<strong>2♠ saut constructif</strong> : 6 cartes solides (KQJ975), 9 H non-vulnérable. Le saut d\'intervention montre 6+ cartes solides et une force limitée (9-13 H). Il décrit et barre en même temps. 3♠ serait excessif avec seulement 9 H — réservé aux longues de 7 cartes ou mains plus faibles.'
+    },
+    {
+      cat:'Séquence complexe',
+      q:'Adversaire ouvre 1♠, partner contre, adversaire soutient 2♠. Que répondez-vous ?',
+      hand:{s:'74',h:'KQ973',d:'A82',c:'Q54'},
+      ctx:'Séquence : (1♠) – Contre – (2♠) – ?',
+      pts:'12 H · 5♥ · main correcte',
+      opts:['Passe — insuffisant','2♥ — naturel, encourageant','3♥ — forcing manche','Contre de pénalité'],
+      ans:2,
+      expl:'<strong>3♥</strong> : partner a contré (12+ H + distribution) et 2♠ a été licité. Avec 12 H et 5 cœurs solides (KQ973 + A♦), la manche est très probable. 3♥ = forcing manche, décrit 5 cœurs et invite partner à choisir le contrat. 2♥ serait trop timide avec cette force.'
+    }
+  ]
+}
+};
+
+let curLevel=1, curQ=0, ans=[], done=[];
+
+function hs(t){
+  return (t||'').replace(/[♥♦]/g,m=>`<span class="o">${m}</span>`)
+    .replace(/♠/g,'<span>♠</span>').replace(/♣/g,'<span class="g">♣</span>');
+}
+
+function renderHand(h,pts){
+  const rows=[
+    {sym:'♠',cls:'sp',k:'s'},{sym:'♥',cls:'ht',k:'h'},
+    {sym:'♦',cls:'di',k:'d'},{sym:'♣',cls:'cl',k:'c'}
+  ];
+  const suits=rows.map(r=>`<div class="hr"><span class="ss ${r.cls}">${r.sym}</span><span class="sc">${h[r.k]}</span></div>`).join('');
+  return `<div class="hand-wrap"><div class="hand-col"><div class="hand-label">votre main</div><div class="hand-suits">${suits}</div><div class="hand-meta">${pts}</div></div></div>`;
+}
+
+function start(level){
+  curLevel=level;curQ=0;
+  const mod=LEVELS[level];
+  ans=new Array(mod.q.length).fill(null);
+  done=new Array(mod.q.length).fill(false);
+  document.getElementById('home').style.display='none';
+  document.getElementById('result').style.display='none';
+  document.getElementById('quiz').style.display='block';
+  document.getElementById('lvl-pill').textContent='Niveau '+level;
+  render();
+}
+
+function render(){
+  const mod=LEVELS[curLevel];
+  const q=mod.q[curQ];
+  const total=mod.q.length;
+  const ok=ans.filter((a,i)=>a!==null&&a===mod.q[i].ans).length;
+  const dt=done.filter(Boolean).length;
+
+  document.getElementById('pbar-label').textContent=`Q${curQ+1} / ${total}`;
+  document.getElementById('pbar-score').textContent=dt>0?`${ok}/${dt} correcte${ok>1?'s':''}` :'';
+  document.getElementById('pbar-fill').style.width=((curQ+1)/total*100)+'%';
+  document.getElementById('q-counter').textContent=`${curQ+1}/${total}`;
+  document.getElementById('q-cat').innerHTML=hs(q.cat);
+  document.getElementById('q-text').innerHTML=hs(q.q);
+
+  document.getElementById('hand-zone').innerHTML=renderHand(q.hand,q.pts);
+
+  const cz=document.getElementById('ctx-zone');
+  cz.innerHTML=q.ctx?`<div class="ctx-box">${hs(q.ctx)}</div>`:'';
+
+  const od=document.getElementById('opts');
+  od.innerHTML='';
+  ['A','B','C','D'].forEach((k,i)=>{
+    if(i>=q.opts.length)return;
+    const b=document.createElement('button');
+    b.className='opt'+(done[curQ]?(i===q.ans?' correct':i===ans[curQ]?' wrong':''):'');
+    b.disabled=done[curQ];
+    b.innerHTML=`<span class="opt-k">${k}</span>${hs(q.opts[i])}`;
+    if(!done[curQ])b.onclick=()=>pick(i);
+    od.appendChild(b);
+  });
+
+  const ep=document.getElementById('expl');
+  ep.innerHTML=q.expl;
+  ep.className='expl'+(done[curQ]?' show':'');
+
+  document.getElementById('prev-btn').disabled=curQ===0;
+  document.getElementById('next-btn').disabled=!done[curQ];
+
+  const nm=document.getElementById('nav-mid');
+  nm.innerHTML=dt>0?`<span>${ok}</span>/${dt}`:'&nbsp;';
+}
+
+function pick(i){
+  if(done[curQ])return;
+  ans[curQ]=i;done[curQ]=true;
+  render();
+  if(curQ===LEVELS[curLevel].q.length-1)setTimeout(showResult,700);
+}
+
+function nav(d){
+  curQ=Math.max(0,Math.min(LEVELS[curLevel].q.length-1,curQ+d));
+  render();
+}
+
+function showResult(){
+  const mod=LEVELS[curLevel];
+  const total=mod.q.length;
+  const ok=ans.filter((a,i)=>a!==null&&a===mod.q[i].ans).length;
+  const pct=ok/total;
+  document.getElementById('quiz').style.display='none';
+  const r=document.getElementById('result');r.style.display='block';
+  document.getElementById('res-num').textContent=`${ok}/${total}`;
+  document.getElementById('res-denom').textContent='bonnes réponses';
+  document.getElementById('res-level').textContent=mod.label;
+  document.getElementById('res-msg').textContent=
+    pct===1?'Parfait. Maîtrise totale des enchères compétitives à ce niveau.':
+    pct>=.8?'Très bon résultat. Quelques situations complexes à revoir.':
+    pct>=.6?'Bon niveau. Relisez les explications des questions manquées.':
+    pct>=.4?'Des lacunes à combler. Reprenez le module après révision du SEF.':
+    'Continuez à étudier — les enchères compétitives demandent de la pratique.';
+}
+
+function restart(){document.getElementById('result').style.display='none';start(curLevel);}
+function goOther(){document.getElementById('result').style.display='none';start(curLevel===1?2:1);}
+function goHome(){
+  document.getElementById('quiz').style.display='none';
+  document.getElementById('result').style.display='none';
+  document.getElementById('home').style.display='block';
+}
+</script>
+</body>
+</html>
